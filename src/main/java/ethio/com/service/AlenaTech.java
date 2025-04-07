@@ -1,5 +1,6 @@
 package ethio.com.service;
 
+import ethio.com.dao.CustomerTransactionsDao;
 import ethio.com.models.Request;
 import ethio.com.session.SessionManager;
 import ethio.com.dao.CustomerInfoViewDao;
@@ -31,16 +32,25 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Logger;
+// =================to insert in to db
+import ethio.com.DatabaseHelper;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+//=====================
 @Path("/ethio")
 @RequestScoped
 @Stateful
 public class AlenaTech {
+
 //    private static final Logger LOGGER = Logger.getLogger(AlenaTech.class.getName());
 private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
     @PersistenceContext(unitName = "primary")
     private EntityManager em;
     @EJB
     CustomerInfoViewDao customerInfoViewDao;
+    @EJB
+    CustomerTransactionsDao transactionsDao;
     private static final String nextCharacter = "+";
     private static final int maxBankListValue = 8;
     private static final int accountListStartIteration = 3;
@@ -373,6 +383,7 @@ private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME)
                         Topupresponse = Topupresponse.replace("[\"", "").replace("\"]", "");
                         System.out.println("Topup process response after replace" + Topupresponse);
                         try {
+
                             JSONObject jsonResponse = new JSONObject(Topupresponse);
                             String type = jsonResponse.optString("type");
                             System.out.println("type: " + type);
@@ -388,10 +399,26 @@ private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME)
                             System.out.println("message: " + messageResponse);
                             String cbsTxnStatus = jsonResponse.optString("cbsTxnStatus");
                             System.out.println("cbsTxnStatus: " + cbsTxnStatus);
-                            String txnamt = jsonResponse.optString("txnamt");
-                            System.out.println("txnamt: " + txnamt);
-                            if ("000".equals(txnStatus.trim())) {
+//                            String txnamt = jsonResponse.optString("txnamt");
+//                            System.out.println("txnamt: " + txnamt);
+                            if (!"000".equals(txnStatus.trim())) {
                                 System.out.println("Transaction Status is SUCCESS");
+                                //======================================
+                                boolean transactionSaved = transactionsDao.persistTransaction(
+                                       phoneNumber,
+                                        selectedBankNumber,
+                                        amount,
+                                        "ETB"
+                                );
+//                                System.out.println("");
+
+                                if (transactionSaved) {
+                                    System.out.println("Transaction details saved successfully in the database."+transactionSaved);
+                                } else {
+                                    System.out.println("Failed to save transaction details in the database.");
+                                }
+
+
                                 ethio.com.models.Response res = new ethio.com.models.Response();
                                 res.setTransactionId(reqres.getSessionId());
                                 res.setAction("end");
@@ -464,6 +491,7 @@ private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME)
         }
         return builder.build();
     }
+    //========================================to insert int to table
     private String limitCheck(int amount, String phoneNumber) {
         if (phoneNumber.startsWith("09")) {
             phoneNumber = "251" + phoneNumber.substring(1);
@@ -486,6 +514,7 @@ private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME)
         client.close();
         return responseString;
     }
+
     private Response handleBankSelection(RequestResponseCol reqres, List<CustomerInfoView> customerAccounts, String amountStr,  String owenbankNumber,String phoneNumber) throws Exception {
         int selectedIndex;
         LOGGER.info("selectedBankNumber: OtherbankNumber " + owenbankNumber);
@@ -522,8 +551,6 @@ private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME)
         }
     }
     public String processTopUp(String phoneNumber,String accountNumber, int amount) throws Exception {
-
-
         System.out.println("processTopUp inside processTopUp" );
         String response_token=fetchToken();
         JSONObject token = new JSONObject(response_token);
