@@ -1,74 +1,152 @@
-# USSD Flight Payment Flow for Wegagen Bank SC
+Ethio Telecom Mobile Top-up Integration with Wegagen Bank
+Overview
+This project implements the integration of Ethio Telecom's Mobile Top-up service with Wegagen Bank through a USSD interface. It allows users to perform mobile phone balance recharges using their Wegagen Bank accounts, following a multi-step flow that ensures secure and accurate top-up transactions.
 
-## Overview
-This document describes the USSD flow specifically designed for flight payment transactions at Wegagen Bank SC. The process guides users through the following steps: selecting an account, entering the order ID, confirming the transaction, and completing payment securely via password authentication.
+Table of Contents
+1 Features
 
-## Flow of Operations
+2 System Requirements
 
-### 1. **Account Selection (Iteration 2)**
-- **Action:** After the user is authenticated, they are presented with a list of their available bank accounts. The user selects the account they wish to use for the payment.
-- **Example Response:**
+ 3 How to Use
 
-Select your account:
+4 Code Overview
 
-1. 1234567890
-2. 0987654321
+5 Transaction Flow
 
-- **User Action:** The user selects an account by entering the corresponding number.
+6 Error Handling
 
-### 2. **Order ID Entry (Iteration 3)**
-- **Action:** After selecting an account, the user is prompted to enter the order ID for their flight booking.
-- **Example Prompt:**
+7 Integration with Ethio Telecom and Wegagen Bank
 
-- **User Action:** The user enters their flight order ID.
+8 Database Integration
 
-### 3. **Order Information Display (Iteration 4)**
-- **Action:** The USSD service retrieves and displays the flight order details, including the order's name and amount, based on the provided order ID.
-- **Example Response:**
+Features
+===============
+* USSD Interaction: The system leverages USSD  codes to guide users through the recharge process.
 
+* Iterative Process: The integration uses an iterative process for gathering data and processing requests.
 
-### 4. **Transaction Confirmation (Iteration 5)**
-- **Action:** The user is asked to confirm the transaction. The user can confirm by pressing "1" or cancel by pressing "2."
-- **Example Prompt:**
+* Phone Number Validation: Ensures that phone numbers entered by users are valid.
 
-Confirm your transaction:
+* Bank Number Selection: Users can select their preferred bank account for the recharge.
 
-1. Confirm
-2. Cancel
+* Amount Validation: Ensures that the amount entered by the user is valid and meets the necessary requirements.
 
-- **User Action:** 
-- If the user presses "1", they proceed to the next step for entering their password.
-- If the user presses "2", they will be informed that the transaction is canceled.
+* Transaction Success/Failure Handling: The system provides appropriate responses based on the transaction result.
 
-### 5. **Password Entry for Final Confirmation (Iteration 6)**
-- **Action:** If the user confirmed the transaction, they are prompted to enter their password for final authentication to complete the payment.
-- **Example Prompt:**
+System Requirements
+================================================================================================================
+* Java Development Kit (JDK) 8 or higher.
 
-Enter your password:
+* Integrated Development Environment (IDE) like IntelliJ IDEA, Eclipse, or similar.
 
-- **User Action:** The user enters their password.
+* A compatible web service to handle USSD and API calls for both Ethio Telecom and Wegagen Bank.
 
-### 6. **Transaction Completion or Cancellation**
-- **If Password is Correct:**
-- The payment is successfully processed, and the user is notified with a success message.
-- **Example Message:**
-  ```
-  Your payment has been successfully processed. Thank you for using Wegagen Bank SC.
-  ```
-- **If User Presses "2" to Cancel:**
-- The user is notified that the transaction has been canceled.
-- **Example Message:**
-  ```
-  Your transaction has been canceled.
-  ```
-- **If Password is Incorrect:**
-- The user is notified of the invalid password and asked to try again or cancel the transaction.
+* Database integration for saving transaction details (MySQL or another relational database).
 
-## Error Handling
-- **Account Selection Failure:** If no accounts are available or the user fails to select a valid account, an error message is shown.
-- **Invalid Order ID:** If the entered order ID is invalid, the user will be asked to try again.
-- **Transaction Cancellation:** If the user cancels the transaction at any point, they will be informed that the transaction was canceled.
+How to Use
+============================================================================================================
+1 Start the USSD Service: Initiate a session using a USSD code on the mobile device.
 
-## Conclusion
-This USSD flow ensures a smooth and secure flight payment experience for users of Wegagen Bank SC. It includes multiple verification steps such as account selection, order validation, transaction confirmation, and password entry for final payment authorization.
-# TeleTopup
+2 Choose the Action: Users are presented with a series of options to select their preferred action (e.g., recharge mobile or view account balance).
+
+3 Phone Number and Bank Account: Users enter their phone number and choose a bank account for the recharge.
+
+4 Amount Entry: The user specifies the amount to be topped up.
+
+5 PIN Authentication: The user enters a PIN for authentication.
+
+6 Transaction Confirmation: The system processes the transaction and confirms the result.
+
+Code Overview
+==============================================================================================================
+The code implements an interactive session for the user to complete a mobile recharge through a multi-step process. Each step involves the following:
+
+* Session Management: SessionManager handles user sessions, storing and retrieving session data as required.
+
+* Transaction Processing: The system interacts with Ethio Telecom and Wegagen Bank through the appropriate methods.
+
+* Error Handling: The system checks for invalid inputs, session timeouts, and transaction failures.
+
+Session Management
+=================================================================================================================
+* The code uses SessionManager to maintain session states. A session state is tracked for each user, ensuring that each step in the process is properly followed:
+
+* The session is updated each time the user performs an action, such as selecting a bank or inputting an amount.
+
+* The session is removed after the transaction is completed or if an error occurs.
+
+Flow Handling
+========================================================================================================================
+The flow consists of multiple iterations (steps):
+
+1 Iteration 1: User is prompted to select an action (e.g., top-up or check account balance).
+
+2  Iteration 2: User is prompted to select a bank account.
+
+3 Iteration 3-4: User selects the phone number to recharge and the amount to be topped up.
+
+4 Iteration 5-6: User is asked to authenticate with a PIN.
+
+5 Iteration 7-8: The system validates and processes the transaction.
+
+Transaction Validation
+===============================================================================================================
+The system ensures:
+
+* Phone numbers entered are valid.
+
+* Bank account numbers are selected properly.
+
+* Amount entered is positive and within the valid range.
+
+* PIN authentication is successfully completed before proceeding with the transaction.
+
+Error Handling
+==========================================================================================================
+Errors are handled in a variety of ways:
+
+* Invalid Input: Users are notified if their input is invalid (e.g., incorrect phone number format).
+
+* Session Expiry: Sessions that are too long or have invalid actions are terminated.
+
+* Transaction Failure: If the top-up fails, the user is informed with an appropriate message.
+
+Transaction Flow
+=========================================================================================================
+1 Start Session: The system begins with creating a new session for the user.
+
+2 Request Handling: Based on user input, a specific response is built, such as prompting for phone numbers or amount.
+
+3 Top-up Request: If all inputs are validated, the system proceeds with sending a top-up request to Ethio Telecom.
+
+4 Final Response: The transaction status is returned, and the system either confirms the top-up or provides an error message.
+
+Integration with Ethio Telecom and Wegagen Bank
+===================================================================================================================
+* The system assumes that Ethio Telecom provides an API or USSD interface for mobile top-up and balance inquiries.
+
+* The integration assumes Wegagen Bank has a compatible mobile banking or API service for interacting with the user's account.
+
+The system will send top-up requests to Ethio Telecom and receive responses indicating whether the transaction was successful or failed.
+
+Database Integration
+===============================================================================================================
+ The system integrates with a database to persist transaction details. For instance:
+
+* The transactionsDao is responsible for saving the top-up transaction.
+
+* Transaction data includes phone number, bank account, amount, transaction ID, and timestamp.
+
+This allows the system to keep track of all transactions for auditing and verification purposes.
+
+To Run the Project
+==================================================================================================================
+1 Set up a Java environment (JDK 8 or higher).
+
+2 Clone the repository.
+
+3 Configure database connections (if using).
+
+4 Build and run the project on your preferred IDE or using the command line (mvn clean install).
+
+5 Ensure that Ethio Telecom and Wegagen Bank APIs are properly integrated.
