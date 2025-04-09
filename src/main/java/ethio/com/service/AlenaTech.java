@@ -401,7 +401,7 @@ private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME)
                             System.out.println("cbsTxnStatus: " + cbsTxnStatus);
 //                            String txnamt = jsonResponse.optString("txnamt");
 //                            System.out.println("txnamt: " + txnamt);
-                            if (!"000".equals(txnStatus.trim())) {
+                            if ("000".equals(txnStatus.trim())) {
                                 System.out.println("Transaction Status is SUCCESS");
                                 //======================================
                                 boolean transactionSaved = transactionsDao.persistTransaction(
